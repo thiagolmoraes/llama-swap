@@ -34,6 +34,8 @@ jobs:
           node-version: "24"
 
       - name: Build UI + Linux binary
+        env:
+          CGO_ENABLED: 0
         run: make linux-amd64
 
       - name: Build Docker image
