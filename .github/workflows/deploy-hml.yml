@@ -56,11 +56,12 @@ jobs:
       - name: Health check
         run: |
           for i in $(seq 1 10); do
-            if curl -fs http://localhost:8080/health >/dev/null; then
+            status=$(docker inspect --format '{{.State.Health.Status}}' llm_llamaswap)
+            if [ "$status" = "healthy" ]; then
               echo "llama-swap healthy"
               exit 0
             fi
-            echo "waiting for health ($i/10)..."
+            echo "container status: $status ($i/10)..."
             sleep 3
           done
           echo "llama-swap failed health check" >&2
