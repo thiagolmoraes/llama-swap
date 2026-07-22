@@ -1,0 +1,66 @@
+name: Deploy HML
+
+on:
+  push:
+    branches:
+      - deploy/hml
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-hml
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, llamaswap-gpunode02]
+    env:
+      STACK_DIR: /opt/llm-gateway
+      IMAGE_NAME: llm-gateway-llamaswap
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c #6.4.0
+        with:
+          go-version-file: go.mod
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # 6.4.0
+        with:
+          node-version: "24"
+
+      - name: Build UI + Linux binary
+        run: make linux-amd64
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f docker/llama-swap-hml.Containerfile \
+            -t ${IMAGE_NAME}:${{ github.sha }} \
+            -t ${IMAGE_NAME}:latest \
+            .
+
+      - name: Deploy to llm-gateway stack
+        env:
+          LLAMASWAP_TAG: ${{ github.sha }}
+        run: |
+          cd "${STACK_DIR}"
+          LLAMASWAP_TAG="${LLAMASWAP_TAG}" docker compose up -d --no-deps llamaswap
+
+      - name: Health check
+        run: |
+          for i in $(seq 1 10); do
+            if curl -fs http://localhost:8080/health >/dev/null; then
+              echo "llama-swap healthy"
+              exit 0
+            fi
+            echo "waiting for health ($i/10)..."
+            sleep 3
+          done
+          echo "llama-swap failed health check" >&2
+          docker logs llm_llamaswap --tail 100
+          exit 1
