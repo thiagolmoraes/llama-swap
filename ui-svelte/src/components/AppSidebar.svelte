@@ -190,7 +190,11 @@
     >
       <SettingsPopover>
         {#snippet children({ props })}
-          <Sidebar.MenuButton tooltipContent="Settings" {...props}>
+          <Sidebar.MenuButton
+            isActive={isActive("/settings", $currentRoute)}
+            tooltipContent="Settings"
+            {...props}
+          >
             {#snippet child({ props: buttonProps })}
               <button type="button" {...buttonProps}>
                 <Settings />
