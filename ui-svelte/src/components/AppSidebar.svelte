@@ -12,6 +12,7 @@
   import { modelsMenuOpen } from "../stores/sidebar";
   import type { Model } from "../lib/types";
   import ConnectionStatus from "./ConnectionStatus.svelte";
+  import SettingsPopover from "./SettingsPopover.svelte";
 
   function handleTitleChange(newTitle: string): void {
     const sanitized = newTitle.replace(/\n/g, "").trim().substring(0, 64) || "llama-swap";
@@ -187,17 +188,18 @@
     <div
       class="flex items-center justify-between gap-2 px-1 group-data-[collapsible=icon]:flex-col-reverse"
     >
-      <Sidebar.MenuButton
-        isActive={isActive("/settings", $currentRoute)}
-        tooltipContent="Settings"
-      >
-        {#snippet child({ props })}
-          <a href="/settings" use:link {...props}>
-            <Settings />
-            <span>Settings</span>
-          </a>
+      <SettingsPopover>
+        {#snippet children({ props })}
+          <Sidebar.MenuButton tooltipContent="Settings" {...props}>
+            {#snippet child({ props: buttonProps })}
+              <button type="button" {...buttonProps}>
+                <Settings />
+                <span>Settings</span>
+              </button>
+            {/snippet}
+          </Sidebar.MenuButton>
         {/snippet}
-      </Sidebar.MenuButton>
+      </SettingsPopover>
       <Button
         variant="ghost"
         size="icon"

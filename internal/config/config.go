@@ -193,6 +193,11 @@ type Config struct {
 
 	// upstream controls behaviour of the /upstream passthrough endpoint
 	Upstream UpstreamConfig `yaml:"upstream"`
+
+	// ConfigPath is the path to the loaded config file, if any. Not part of
+	// the YAML schema; set from the CLI flag in main() before NewServer. Used
+	// to place runtime-only state (e.g. the settings database) alongside it.
+	ConfigPath string `yaml:"-"`
 }
 
 // RoutingConfig is the canonical, normalized routing/scheduling configuration.

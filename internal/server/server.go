@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -16,6 +18,7 @@ import (
 	"github.com/mostlygeek/llama-swap/internal/logmon"
 	"github.com/mostlygeek/llama-swap/internal/perf"
 	"github.com/mostlygeek/llama-swap/internal/router"
+	"github.com/mostlygeek/llama-swap/internal/settings"
 	"github.com/mostlygeek/llama-swap/internal/shared"
 	"github.com/mostlygeek/llama-swap/internal/store"
 )
@@ -44,6 +47,9 @@ type Server struct {
 
 	mux     *http.ServeMux
 	handler http.Handler
+
+	settings      *settings.SettingsHandler
+	settingsStore *settings.SettingsStore
 
 	shutdownCtx  context.Context
 	shutdownFn   context.CancelFunc
@@ -195,6 +201,22 @@ func New(cfg config.Config, muxlog *logmon.Monitor, proxylog *logmon.Monitor, up
 		shutdownCtx: shutdownCtx,
 		shutdownFn:  shutdownFn,
 	}
+
+	settingsDir := os.TempDir()
+	if cfg.ConfigPath != "" {
+		settingsDir = filepath.Dir(cfg.ConfigPath)
+	}
+	masterKey, err := settings.LoadOrCreateMasterKey(filepath.Join(settingsDir, "settings.key"))
+	if err != nil {
+		return nil, fmt.Errorf("loading settings master key: %w", err)
+	}
+	settingsStore, err := settings.OpenSettingsStore(filepath.Join(settingsDir, "settings.db"), masterKey)
+	if err != nil {
+		return nil, fmt.Errorf("opening settings store: %w", err)
+	}
+	s.settingsStore = settingsStore
+	s.settings = settings.NewSettingsHandler(settingsStore)
+
 	s.routes()
 	s.startPreload()
 	return s, nil
@@ -306,6 +328,9 @@ func (s *Server) routes() {
 	mux.Handle("GET /api/version", apiChain.ThenFunc(s.handleAPIVersion))
 	mux.Handle("GET /api/captures/{id}", apiChain.ThenFunc(s.handleAPICapture))
 
+	// Settings API (HF token, etc.) — auth-protected like the rest of apiChain.
+	s.settings.RegisterRoutes(mux, apiChain)
+
 	s.mux = mux
 	s.handler = chain.New(CreateRequestLogMiddleware(s.proxylog), CreateCORSMiddleware()).Then(mux)
 }
@@ -354,5 +379,12 @@ func (s *Server) Shutdown(timeout time.Duration) error {
 	}
 
 	wg.Wait()
+
+	if s.settingsStore != nil {
+		if err := s.settingsStore.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	return errors.Join(errs...)
 }
