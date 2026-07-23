@@ -37,8 +37,10 @@
     "/models/:id": wrap({ asyncComponent: () => import("./routes/ModelDetail.svelte"), loadingComponent: RouteLoading }),
     "/logs": wrap({ asyncComponent: () => import("./routes/LogViewer.svelte"), loadingComponent: RouteLoading }),
     "/activity": wrap({ asyncComponent: () => import("./routes/Activity.svelte"), loadingComponent: RouteLoading }),
-    "/settings": wrap({ asyncComponent: () => import("./routes/Settings.svelte"), loadingComponent: RouteLoading }),
     "/performance": wrap({ asyncComponent: () => import("./routes/Performance.svelte"), loadingComponent: RouteLoading }),
+    "/integrations": wrap({ asyncComponent: () => import("./routes/Integrations.svelte"), loadingComponent: RouteLoading }),
+    "/appearance": wrap({ asyncComponent: () => import("./routes/Appearance.svelte"), loadingComponent: RouteLoading }),
+    "/about": wrap({ asyncComponent: () => import("./routes/About.svelte"), loadingComponent: RouteLoading }),
     "*": wrap({ asyncComponent: () => import("./routes/Activity.svelte"), loadingComponent: RouteLoading }),
   };
 
@@ -48,8 +50,10 @@
     "/models": "Models",
     "/activity": "Activity",
     "/logs": "Logs",
-    "/settings": "Settings",
     "/performance": "Performance",
+    "/integrations": "Integrations",
+    "/appearance": "Appearance",
+    "/about": "About",
   };
 
   let sectionTitle = $derived.by(() => {

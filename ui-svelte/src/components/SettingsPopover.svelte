@@ -8,9 +8,9 @@
   let open = $state(false);
 
   const items = [
-    { tab: "integrations", label: "Integrations", icon: Puzzle },
-    { tab: "appearance", label: "Appearance", icon: Palette },
-    { tab: "about", label: "About", icon: Info },
+    { href: "/integrations", label: "Integrations", icon: Puzzle },
+    { href: "/appearance", label: "Appearance", icon: Palette },
+    { href: "/about", label: "About", icon: Info },
   ];
 </script>
 
@@ -21,9 +21,9 @@
     {/snippet}
   </Popover.Trigger>
   <Popover.Content side="top" align="end" class="w-48 p-1">
-    {#each items as item (item.tab)}
+    {#each items as item (item.href)}
       <a
-        href="/settings?tab={item.tab}"
+        href={item.href}
         use:link
         onclick={() => (open = false)}
         class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
