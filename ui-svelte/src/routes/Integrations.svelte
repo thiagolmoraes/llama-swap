@@ -49,25 +49,36 @@
 </script>
 
 <div class="p-2">
-  <div class="mt-4 mb-4">
+  <div class="mt-4 mb-6">
+    <p class="font-mono text-[10px] tracking-[0.15em] uppercase text-primary/70">SET.01 — Integrations</p>
     <h3 class="text-lg font-semibold">Integrations</h3>
   </div>
 
-  <div class="rounded-lg border p-4 space-y-3 max-w-md">
-    <div class="space-y-1">
-      <h4 class="text-sm font-semibold text-muted-foreground">Hugging Face</h4>
-      <p class="text-xs text-muted-foreground">
-        {hfTokenConfigured ? "Token configured." : "No token configured."}
-      </p>
+  <div class="max-w-md rounded-lg border border-l-2 border-l-primary/40 p-4 space-y-4">
+    <div class="flex items-start justify-between gap-4">
+      <div class="space-y-1">
+        <h4 class="text-sm font-semibold text-muted-foreground">Hugging Face</h4>
+        <p class="text-xs text-muted-foreground">API token for model downloads and gated repos.</p>
+      </div>
+      <div class="flex items-center gap-1.5 pt-0.5">
+        <span
+          class="size-1.5 rounded-full {hfTokenConfigured ? 'bg-success' : 'bg-muted-foreground/40'}"
+        ></span>
+        <span class="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+          {hfTokenConfigured ? "configured" : "unset"}
+        </span>
+      </div>
     </div>
+
     <div class="space-y-1.5">
-      <Label for="hf-token-input">API Token</Label>
+      <Label for="hf-token-input" class="font-mono text-xs">API_TOKEN</Label>
       <Input
         id="hf-token-input"
         type="password"
         placeholder={hfTokenConfigured ? "•••••••••••••••• (replace)" : "hf_..."}
         bind:value={hfTokenInput}
         disabled={hfTokenStatus === "saving"}
+        class="font-mono text-sm"
       />
     </div>
     {#if hfTokenStatus === "error"}
