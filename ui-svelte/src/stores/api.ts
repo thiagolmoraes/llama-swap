@@ -223,6 +223,35 @@ export async function fetchProfiles(): Promise<ProfileState> {
   return state;
 }
 
+export async function fetchHFTokenStatus(): Promise<boolean> {
+  const response = await fetch("/api/settings/hf-token");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch HF token status: ${response.status}`);
+  }
+  const data = (await response.json()) as { configured: boolean };
+  return data.configured;
+}
+
+export async function saveHFToken(token: string): Promise<void> {
+  const response = await fetch("/api/settings/hf-token", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to save HF token: ${response.status}`);
+  }
+}
+
+export async function clearHFToken(): Promise<void> {
+  const response = await fetch("/api/settings/hf-token", {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to clear HF token: ${response.status}`);
+  }
+}
+
 export async function setActiveProfile(name: string | null): Promise<void> {
   const revision = profileRevision;
   const response = await fetch("/api/profiles/active", {

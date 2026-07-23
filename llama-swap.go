@@ -102,6 +102,7 @@ func main() {
 		slog.Error("failed to load config", "config", *flagConfig, "config-dir", *flagConfigDir, "error", err)
 		os.Exit(1)
 	}
+	cfg.ConfigPath = *flagConfig
 
 	// Loggers are wired per cfg.LogToStdout: proxy/upstream feed muxLog, which
 	// owns the combined history served by /logs. They outlive config reloads,
